@@ -1,0 +1,172 @@
+
+
+  * ZRJCode
+
+    JIS X 0208 の符号空間(シフト JIS 拡張部分を含む)の符号位置に 0 から
+    始まる整数値を順番に付した「連続コード」値を仲介して、各種漢字コード
+    の符号値の変換を行うモジュール。主に、JIS 符号の変種(Unicode への
+    対応が異なるもの)を正しく区別して扱うことを目的とする。Unicode と
+    の間の変換には Perl 標準の Encode モジュールの変換結果を利用する。
+
+    このモジュールでは、JIS (JIS 符号値の GL 表現のこと)、EUC、SJIS の
+    符号値を 16 進 4 桁の整数値で表す。また、いわゆる「区点コード」の値
+    は 10 進 4～5 桁(区 2～3 桁 + 点 2 桁)の整数値で表され、Unicode は
+    そのスカラー値で表現される。例えば、<亜> の符号値は JIS では 0x3021、
+    区点では 1601、Unicode では 0x4E9C、連続コードでは 1410 となる。
+
+    実際には、「連続コード」を抽象的に「符号位置」と捉えると、利用法を理解
+    しやすい。例えば、「16 区 1 点から 19 区 20 点までの JIS コード」に
+    ついてのループは、次のように書ける。
+
+      foreach $ic (kuten(1601) .. kuten(1920)) { # 区点→連続
+        $jc = in_jis($ic); # 連続→JIS
+        ...
+      }
+
+    このモジュールで与えられる関数・定数は既定ではインポートされない。
+    use ZRJCode 'all'; で全てがインポートされる。
+
+    関数の一覧。符号値を返す関数は失敗時に未定義値を返す。
+
+    - jis(JC) : JIS→連続
+    - euc(EC) : EUC→連続
+    - sjis(SC) : SJIS→連続
+    - kuten(KC) : 区点→連続
+    - ucs(UC, JV) : 変種 JV の下で、Unicode→連続の変換。
+    - in_jis(IC) : 連続→JIS
+    - in_euc(IC) : 連続→EUC
+    - in_sjis(IC) : 連続→SJIS
+    - in_kuten(IC) : 連続→区点
+    - in_ucs(IC, JV) : 変種 JV の下で、連続→Unicode の変換。
+    - defined_jis(IC, JV) : 変種 JV の下で、連続コード位置 IC に文字が
+      割り当てられているか。
+    - defined_jis_p(IC, JV) : defined_jis と同じだが、外字領域を割当済
+      とみなす。(外字領域は CP932 にのみ存在する。)
+    - avail_jis(UC, JV) : 変種 JV の文字集合が Unicode 位置 UC の文字を
+      含むか。
+    - avail_jis_p(UC, JV) : avail_jis と同じだが、外字領域を含む。
+    - is_pua_jis(IC) : 連続コード位置 IC が CP932 で外字領域にあるか。
+    - is_pua_ucs(UC) : Unicode 位置 UC が外字領域にあるか。
+    - is_kanji_jis(IC, JV) : 変種 JV の下で、連続コード位置 IC の文字が
+      Unicode の漢字であるか。
+    - is_kanji_ucs(UC) : Unicode 位置 UC の文字が漢字であるか。(部首の
+      文字も漢字とみなす。)
+    - in_hex(NUM) : 整数から 16 進表現文字列への変換。
+    - chrw(NUM) : 2 バイト整数をバイト列(文字列で表す)に変換。
+    - ordw(STR) : chrw の逆変換。
+    - chrk(IC) : 連続コード値 IC を SJIS のバイト列(Windows でそのまま
+      漢字として端末に出力可能)に変換。
+    - ordk(STR) : chrk の逆変換。
+    - chrjis(IC) : 連続コード値 IC を ISO-2022-JP のバイト列に変換。
+
+    ここで JIS 符号系の変種は以下の定数で指定する。
+
+    - EJV_JIS : JIS X 0208:1997
+    - EJV_MS : CP932
+    - EJV_JIS2000 : JIS X 0213:2000
+    - EJV_JIS2004 : JIS X 0213:2004
+    - EJV_PTEX : ptexenc 拡張の pTeX の内部で行われる変換に従う.
+    - EJV_UPTEX : upTeX の内部で行われる変換に従う.
+
+    その他の定数。
+
+    - MAX_UCS : Unicode 符号値の最大値、すなわち 0x10FFEF。
+    - MAX_INTCODE : 本来の符号空間での連続コードの最大値、すなわち 8835
+      (94 区 94 点)。
+    - MAX_INTCODE_EXT : 拡張部分を含む連続コードの最大値、すなわち 11279
+      (120 区 94 点)。
+
+    注意点。
+
+    - pTeX/upTeX では Unicode → JIS 符号への変換が多対一となる。
+    - JIS X 0213 での Unicode → JIS 符号の変換は未対応である。
+    - JIS X 0213 の符号空間は、その SJIS 表現に基づいて、CP932 と同じ
+      モデルで強引に扱われる。例えば、2 面 1 区 1 点は SJIS 値で
+      0xF040 となるので「95 区 1 点」、同様に 2 面 94 区 1 点は
+      「120 区 1 点」として扱う。
+
+  * ZRToCid
+
+    JIS 符号値または Unicode 値から CID 値への変換を行う。実際の関数は
+    各グリフ集合に対応するサブモジュールで提供されるのでそこで説明する
+    ことにし、ここではこのモジュールが提供する定数を挙げる。なお、
+    ZRToCid モジュールおよび各サブモジュールは既定で全ての関数と定数を
+    インポートする。
+
+    書字方向を表す定数(値も規定される)。変換関数において使われる。
+
+    - D_HORIZ : 横書。値は 0。
+    - D_VERT : 縦書。値は 1。
+
+    その他の定数。
+
+    - MAX_CID_AJ1 : Adobe-Japan1 の CID の最大値。
+    - MAX_CID_AK1 : Adobe-Korea1 の CID の最大値。
+    - MAX_CID_AG1 : Adobe-GB1 の CID の最大値。
+    - MAX_CID_AC1 : Adobe-CNS1 の CID の最大値。
+
+  * ZRToCid::AJ1
+
+    - to_aj1(CMAP, DIR, CODE) : 特定の CMap における符号値に対応する CID
+      値。変換元の符号値 CODE はバイト列を big endian で解釈した整数値と
+      して指定する(従って、UCS2 か UTF32 のエンコーディングをもつ CMap の
+      場合は Unicode スカラー値と一致する)。CMap は基本指定 CMAP と書字
+      方向 DIR の組み合わせで指定する。
+
+    基本指定を表す定数。(CMap 名の書字方向を除いた部分の '-' を '_' に置き
+    換えて前に 'C_' を付した名前となっている。)
+
+    - C_ :                 H/V
+    - C_90ms_RKSJ :        90ms-RKSJ-H/V
+    - C_78 :               78-H/V
+    - C_UniJIS_UCS2 :      UniJIS-UCS2-H/V
+    - C_UniJIS_UTF32 :     UniJIS-UTF32-H/V
+    - C_UniJIS2004_UTF32 : UniJIS2004-UTF32-H/V
+
+  * ZRToCid::AK1
+
+    - to_ak1(CMAP, DIR, CODE) : 変換先が Adobe-Korea1 であることを除いて
+      ZRToCid::AJ1::to_aj1 と同様。
+
+    CMap 基本指定を表す定数。
+
+    - C_UniKS_UCS2 :   UniKS-UCS2-H/V
+    - C_UniKS_UTF32 :  UniKS-UTF32-H/V
+
+  * ZRToCid::AG1
+
+    - to_ag1(CMAP, DIR, CODE) : 変換先が Adobe-GB1 であることを除いて
+      ZRToCid::AJ1::to_aj1 と同様。
+
+    CMap 基本指定を表す定数。
+
+    - C_UniGB_UCS2 :   UniGB-UCS2-H/V
+    - C_UniGB_UTF32 :  UniGB-UTF32-H/V
+
+  * ZRToCid::AC1
+
+    - to_ac1(CMAP, DIR, CODE) : 変換先が Adobe-CNS1 であることを除いて
+      ZRToCid::AJ1::to_aj1 と同様。
+
+    CMap 基本指定を表す定数。
+
+    - C_UniCNS_UCS2 :   UniCNS-UCS2-H/V
+    - C_UniCNS_UTF32 :  UniCNS-UTF32-H/V
+
+  * ZRKanaCid
+
+    仮名文字について、JIS 符号値から Adobe-Japan1 の CID への変換を行う。
+    AJ1 に含まれる各変種が選択可能である。
+
+    - get_cid_kana(VAR, DIR, JC) : 仮名変種 VAR、書字方向 DIR において、
+      JIS 符号値 JC の仮名文字に対応する AJ1 の CID 値を返す。失敗時
+      は未定義値を返す。DIR は横書が 0、縦書が 1。
+
+    仮名変種を表す定数。
+
+    - C_NORMKANA : 通常。
+    - C_EXPKANA : エキスパート(特定の書字方向に適した字形)。
+    - C_RUBYKANA : ルビ用字形。
+    (プロポーショナル字形には未対応。)
+
+
