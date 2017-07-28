@@ -1,13 +1,14 @@
 package ZRToCid::AJ1;
 use strict qw( refs vars subs );
-our $VERSION = 0.002_00;
-our $mod_date = "2010/04/10";
+our $VERSION = 0.003_00;
+our $mod_date = "2017/07/28";
 require Exporter;
 use ZRToCid;
 our @ISA = qw( Exporter );
 our @EXPORT = qw( 
   C_ C_N C_90ms_RKSJ C_78 C_UniJIS_UCS2 C_UniJIS_UTF32
   C_UniJIS2004_UTF32 max_cid_aj1 to_aj1
+  C_UniJISX0213_UTF32 C_UniJISX02132004_UTF32 C_UniJISPro_UCS2
 );
 our @EXPORT_OK = qw( get_cid get_cid_map );
 
@@ -21,6 +22,9 @@ use constant {
   C_UniJIS_UCS2      => 3,
   C_UniJIS_UTF32     => 4,
   C_UniJIS2004_UTF32 => 5,
+  C_UniJISX0213_UTF32     => 6,
+  C_UniJISX02132004_UTF32 => 7,
+  C_UniJISPro_UCS2        => 8,
 };
 use constant { U_ => undef };
 *init_rev_map = \&ZRToCid::init_rev_map;
@@ -722,8 +726,8 @@ U_,
 [8527,33134,8527,65341,65341,65341],
 [8528,33135,8528,65371,65371,65371],
 [8529,33136,8529,65373,65373,65373],
-[8530,33137,8530,12296,12296,12296],
-[8531,33138,8531,12297,12297,12297],
+[8530,33137,8530,12296,[[9001,12296],U_],[[9001,12296],U_]],
+[8531,33138,8531,12297,[[9002,12297],U_],[[9002,12297],U_]],
 [8532,33139,8532,12298,12298,12298],
 [8533,33140,8533,12299,12299,12299],
 [8534,33141,8534,12300,12300,12300],
@@ -15948,7 +15952,7 @@ U_,
 U_,
 [U_,U_,U_,U_,8862,8862],
 U_,
-U_,
+[U_,U_,U_,U_,8319,8319],
 U_,
 U_,
 U_,
@@ -20196,7 +20200,7 @@ U_,
 [U_,U_,U_,U_,178068,178068],
 U_,
 U_,
-U_,
+[U_,U_,U_,U_,40908,40908],
 U_,
 [U_,U_,U_,U_,15665,15665],
 U_,

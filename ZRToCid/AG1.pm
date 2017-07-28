@@ -1,7 +1,7 @@
 package ZRToCid::AG1;
 use strict qw( refs vars subs );
-our $VERSION = 0.002_00;
-our $mod_date = "2010/04/10";
+our $VERSION = 0.003_00;
+our $mod_date = "2017/07/28";
 require Exporter;
 use ZRToCid;
 our @ISA = qw( Exporter );

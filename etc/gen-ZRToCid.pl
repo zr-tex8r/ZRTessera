@@ -1,8 +1,8 @@
 #!perl
 use strict;
-my $TEXMF = "C:/usr/local/share/texmf";
-my $out_version = v0.2.0;
-my $out_mod_date = "2010/04/10";
+my $TEXMF = "C:/usr/local/share/texmf-dist";
+my $out_version = v0.3.0;
+my $out_mod_date = "2017/07/28";
 
 use constant {
   AJ1 => 0, AK1 => 1, AG1 => 2, AC1 => 3
@@ -24,6 +24,9 @@ my @column = (
     17, # C_UniJIS_UCS2
     21, # C_UniJIS_UTF32
     24, # C_UniJIS2004_UTF32
+    #25, # C_UniJISX0213_UTF32
+    #26, # C_UniJISX02132004_UTF32
+    #50, # C_UniJISPro_UCS2
   ],
   [ #AK1
      7, # C_UniKS_UCS2
@@ -37,6 +40,12 @@ my @column = (
      8, # C_UniCNS_UCS2
     11, # C_UniCNS_UTF32
   ],
+);
+my @interceptor = (
+  { # AJ1
+    pre  => \&unijispro_pre,
+    line => \&unijispro_line,
+  }
 );
 my @source_prologue = (
   \&source_aj1_prologue,
@@ -66,11 +75,14 @@ sub main_inner {
 }
 
 sub source_cid2code {
-  my ($idx) = @_; my (@cnks, $cnt);
+  my ($idx) = @_; my @cnks; my $cnt = 0;
+  my $inter = $interceptor[$idx];
   open(my $hi, '<', $data_file[$idx]) or die;
+  if (defined $inter) { $inter->{pre}->($hi); }
   while (my $txt = <$hi>) {
     if ($txt =~ m/^\d/) {
       chomp($txt); my @fs = split(m/\t/, $txt);
+      if (defined $inter) { $inter->{line}->($cnt, \@fs); }
       @fs = map { conv_cell($_) } (@fs[@{$column[$idx]}]);
       push(@cnks, form_list(\@fs), ",\n"); ++$cnt;
     }
@@ -108,6 +120,36 @@ sub form_list {
     return "[$r]";
   } elsif (defined $v) { return $v; }
   else { return UNDEF_SYM; }
+}
+{
+  my (%unijispro);
+  sub unijispro_pre {
+    my ($hi) = @_; local ($_); my $st = 0; my @fs;
+    while (<$hi>) {
+      if ($st == 1) {
+        if (@fs = m/^\#\s+U\+(\w+)\s+(\w+)\s+(?:(\w+)|n.a)/) {
+          $unijispro{$fs[1]} = hex($fs[0]);
+          $unijispro{$fs[2]} = -hex($fs[0]) if ($fs[2] ne 'n/a'); 
+        } else { last; }
+      }
+      if (m/^\#\s+UniJISPro-UCS2-V\s+UniJIS-UCS2-V/) { $st = 1; }
+    }
+  }
+  sub unijispro_line {
+    my ($cid, $fs) = @_;
+    my $ent = $fs->[17]; my $up = $unijispro{$cid};
+    if (defined $up) {
+      my $ux = sprintf("%04xv", abs($up));
+      if ($up < 0) {
+        ($ux eq $ent) or die "Oops($cid)";
+        $ent = "*";
+      } else {
+        $ent = ($ent eq "*") ? $ux : "$ent,$ux";
+      }
+      printf("%05d: %s -> %s\n", $cid, $fs->[17], $ent);
+    }
+    $fs->[50] = $ent;
+  }
 }
 
 sub source_outer {
@@ -205,6 +247,7 @@ our @ISA = qw( Exporter );
 our @EXPORT = qw( 
   C_ C_N C_90ms_RKSJ C_78 C_UniJIS_UCS2 C_UniJIS_UTF32
   C_UniJIS2004_UTF32 max_cid_aj1 to_aj1
+  C_UniJISX0213_UTF32 C_UniJISX02132004_UTF32 C_UniJISPro_UCS2
 );
 our @EXPORT_OK = qw( get_cid get_cid_map );
 
@@ -218,6 +261,9 @@ use constant {
   C_UniJIS_UCS2      => 3,
   C_UniJIS_UTF32     => 4,
   C_UniJIS2004_UTF32 => 5,
+  C_UniJISX0213_UTF32     => 6,
+  C_UniJISX02132004_UTF32 => 7,
+  C_UniJISPro_UCS2        => 8,
 };
 END1
 *to_aj1 = \&get_cid;
