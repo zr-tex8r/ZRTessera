@@ -24,9 +24,9 @@ my @column = (
     17, # C_UniJIS_UCS2
     21, # C_UniJIS_UTF32
     24, # C_UniJIS2004_UTF32
-    #25, # C_UniJISX0213_UTF32
-    #26, # C_UniJISX02132004_UTF32
-    #50, # C_UniJISPro_UCS2
+    25, # C_UniJISX0213_UTF32
+    26, # C_UniJISX02132004_UTF32
+    50, # C_UniJISPro_UCS2
   ],
   [ #AK1
      7, # C_UniKS_UCS2
@@ -146,7 +146,7 @@ sub form_list {
       } else {
         $ent = ($ent eq "*") ? $ux : "$ent,$ux";
       }
-      printf("%05d: %s -> %s\n", $cid, $fs->[17], $ent);
+      #printf("%05d: %s -> %s\n", $cid, $fs->[17], $ent);
     }
     $fs->[50] = $ent;
   }
