@@ -1,12 +1,15 @@
 package ZRToCid::AK1;
 use strict qw( refs vars subs );
-our $VERSION = 0.003_00;
-our $mod_date = "2017/07/28";
+our $VERSION = 0.003_01;
+our $mod_date = "2020/02/08";
 require Exporter;
 use ZRToCid;
 our @ISA = qw( Exporter );
 our @EXPORT = qw( C_UniKS_UCS2 C_UniKS_UTF32 max_cid_ak1 to_ak1 );
 our @EXPORT_OK = qw( get_cid get_cid_map );
+our %EXPORT_TAGS = (
+  all => [@EXPORT, @EXPORT_OK]
+);
 
 our (@cid2code, @mapsave);
 sub max_cid_ak1() { return $#cid2code; }

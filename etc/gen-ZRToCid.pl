@@ -1,21 +1,23 @@
 #!perl
 use strict;
-my $TEXMF = "C:/usr/local/share/texmf-dist";
-my $out_version = v0.3.0;
-my $out_mod_date = "2017/07/28";
+my $TEXMF = "C:/texlive/2019/texmf-dist";
+my $cmap_dir = "$TEXMF/fonts/cmap/adobemapping/cmap-resources";
+my $out_version = v0.3.1;
+my $out_mod_date = "2020/02/08";
 
 use constant {
-  AJ1 => 0, AK1 => 1, AG1 => 2, AC1 => 3
+  AJ1 => 0, AK1 => 1, AG1 => 2, AC1 => 3, AKR => 4
 };
 my @data_file = (
-  "$TEXMF/fonts/cmap/adobemapping/aj16/cid2code.txt",
-  "$TEXMF/fonts/cmap/adobemapping/ak12/cid2code.txt",
-  "$TEXMF/fonts/cmap/adobemapping/ag15/cid2code.txt",
-  "$TEXMF/fonts/cmap/adobemapping/ac16/cid2code.txt",
+  "$cmap_dir/Adobe-Japan1-7/cid2code.txt",
+  "$cmap_dir/Adobe-Korea1-2/cid2code.txt",
+  "$cmap_dir/Adobe-GB1-5/cid2code.txt",
+  "$cmap_dir/Adobe-CNS1-7/cid2code.txt",
+  "$cmap_dir/Adobe-KR-9/cid2code.txt",
 );
 #
 use constant { UNDEF_SYM => 'U_' };
-my @ccname = qw( AJ1 AK1 AG1 AC1 );
+my @ccname = qw( AJ1 AK1 AG1 AC1 AKR );
 my @column = (
   [ # AJ1
      1, # C_N
@@ -40,6 +42,10 @@ my @column = (
      8, # C_UniCNS_UCS2
     11, # C_UniCNS_UTF32
   ],
+  [ # AKR
+     2, # C_UniAKR-UTF16
+     3, # C_UniAKR-UTF32
+  ],
 );
 my @interceptor = (
   { # AJ1
@@ -52,6 +58,7 @@ my @source_prologue = (
   \&source_ak1_prologue,
   \&source_ag1_prologue,
   \&source_ac1_prologue,
+  \&source_akr_prologue,
 );
 my @max_cid;
 
@@ -163,6 +170,9 @@ our @ISA = qw( Exporter );
 our @EXPORT = qw(
   DIR_HORIZ DIR_VERT ?MAXCIDS?
 );
+our %EXPORT_TAGS = (
+  all => [@EXPORT]
+);
 
 use constant {
   DIR_HORIZ => 0,
@@ -250,6 +260,9 @@ our @EXPORT = qw(
   C_UniJISX0213_UTF32 C_UniJISX02132004_UTF32 C_UniJISPro_UCS2
 );
 our @EXPORT_OK = qw( get_cid get_cid_map );
+our %EXPORT_TAGS = (
+  all => [@EXPORT, @EXPORT_OK]
+);
 
 our (@cid2code, @mapsave);
 sub max_cid_aj1() { return $#cid2code; }
@@ -284,6 +297,9 @@ use ZRToCid;
 our @ISA = qw( Exporter );
 our @EXPORT = qw( C_UniKS_UCS2 C_UniKS_UTF32 max_cid_ak1 to_ak1 );
 our @EXPORT_OK = qw( get_cid get_cid_map );
+our %EXPORT_TAGS = (
+  all => [@EXPORT, @EXPORT_OK]
+);
 
 our (@cid2code, @mapsave);
 sub max_cid_ak1() { return $#cid2code; }
@@ -310,6 +326,9 @@ use ZRToCid;
 our @ISA = qw( Exporter );
 our @EXPORT = qw( C_UniGB_UCS2 C_UniGB_UTF32 max_cid_ag1 to_ag1 );
 our @EXPORT_OK = qw( get_cid get_cid_map );
+our %EXPORT_TAGS = (
+  all => [@EXPORT, @EXPORT_OK]
+);
 
 our (@cid2code, @mapsave);
 sub max_cid_ag1() { return $#cid2code; }
@@ -336,6 +355,9 @@ use ZRToCid;
 our @ISA = qw( Exporter );
 our @EXPORT = qw( C_UniCNS_UCS2 C_UniCNS_UTF32 max_cid_ac1 to_ac1 );
 our @EXPORT_OK = qw( get_cid get_cid_map );
+our %EXPORT_TAGS = (
+  all => [@EXPORT, @EXPORT_OK]
+);
 
 our (@cid2code, @mapsave);
 sub max_cid_ac1() { return $#cid2code; }
@@ -345,6 +367,35 @@ use constant {
 };
 END1
 *to_ac1 = \&get_cid;
+@cid2code = (
+END2
+#-----------------------------------------------------------------------
+}
+
+sub source_akr_prologue {
+#-----------------------------------------------------------------------
+  return set_version(<<'END1', source_inner_part(), <<'END2');
+package ZRToCid::AKR;
+our $VERSION = ?VERSION?;
+our $mod_date = ?MODDATE?;
+use strict qw( refs vars subs );
+require Exporter;
+use ZRToCid;
+our @ISA = qw( Exporter );
+our @EXPORT = qw( C_UniAKR_UTF16 C_UniAKR_UTF32 max_cid_akr to_akr );
+our @EXPORT_OK = qw( get_cid get_cid_map );
+our %EXPORT_TAGS = (
+  all => [@EXPORT, @EXPORT_OK]
+);
+
+our (@cid2code, @mapsave);
+sub max_cid_akr() { return $#cid2code; }
+use constant {
+  C_UniAKR_UTF16     => 0,
+  C_UniAKR_UTF32     => 1,
+};
+END1
+*to_akr = \&get_cid;
 @cid2code = (
 END2
 #-----------------------------------------------------------------------

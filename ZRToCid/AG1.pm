@@ -1,12 +1,15 @@
 package ZRToCid::AG1;
 use strict qw( refs vars subs );
-our $VERSION = 0.003_00;
-our $mod_date = "2017/07/28";
+our $VERSION = 0.003_01;
+our $mod_date = "2020/02/08";
 require Exporter;
 use ZRToCid;
 our @ISA = qw( Exporter );
 our @EXPORT = qw( C_UniGB_UCS2 C_UniGB_UTF32 max_cid_ag1 to_ag1 );
 our @EXPORT_OK = qw( get_cid get_cid_map );
+our %EXPORT_TAGS = (
+  all => [@EXPORT, @EXPORT_OK]
+);
 
 our (@cid2code, @mapsave);
 sub max_cid_ag1() { return $#cid2code; }
@@ -147,8 +150,8 @@ U_,
 [8221,8221],
 [12308,12308],
 [12309,12309],
-[12296,12296],
-[12297,12297],
+[12296,[[9001,12296],U_]],
+[12297,[[9002,12297],U_]],
 [12298,12298],
 [12299,12299],
 [12300,12300],
@@ -766,10 +769,10 @@ U_,
 [12580,12580],
 [12581,12581],
 [12582,12582],
-[12583,12583],
+[12583],
 [12584,12584],
 [12585,12585],
-U_,
+[U_,12583],
 [9472,9472],
 [9473,9473],
 [9474,9474],
@@ -7748,7 +7751,7 @@ U_,
 [U_,169],
 [U_,8482],
 U_,
-U_,
+[U_,8194],
 [30362,30362],
 [34297,34297],
 [31001,31001],

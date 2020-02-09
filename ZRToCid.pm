@@ -1,11 +1,14 @@
 package ZRToCid;
 use strict qw( refs vars subs );
-our $VERSION = 0.003_00;
-our $mod_date = "2017/07/28";
+our $VERSION = 0.003_01;
+our $mod_date = "2020/02/08";
 require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT = qw(
-  DIR_HORIZ DIR_VERT MAX_CID_AJ1 MAX_CID_AK1 MAX_CID_AG1 MAX_CID_AC1
+  DIR_HORIZ DIR_VERT MAX_CID_AJ1 MAX_CID_AK1 MAX_CID_AG1 MAX_CID_AC1 MAX_CID_AKR
+);
+our %EXPORT_TAGS = (
+  all => [@EXPORT]
 );
 
 use constant {
@@ -13,10 +16,11 @@ use constant {
   DIR_VERT => 1,
 };
 use constant {
-  MAX_CID_AJ1 => 23057,
+  MAX_CID_AJ1 => 23059,
   MAX_CID_AK1 => 18351,
   MAX_CID_AG1 => 30283,
-  MAX_CID_AC1 => 19155,
+  MAX_CID_AC1 => 19178,
+  MAX_CID_AKR => 22896,
 };
 
 sub init_rev_map {
