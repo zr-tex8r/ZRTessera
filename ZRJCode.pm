@@ -4,8 +4,8 @@
 #### start package
 package ZRJCode;
 use strict qw( refs vars subs );
-our $VERSION = 0.002_01;
-our $mod_date = "2010/05/06";
+our $VERSION = 0.002_03;
+our $mod_date = "2024/07/20";
 require Exporter;
 our @ISA = qw( Exporter );
 our @EXPORT = ();
@@ -16,7 +16,7 @@ our @EXPORT_OK = qw(
   in_ucs ucs is_pua_ucs is_pua_jis is_kanji_ucs is_kanji_jis
   avail_jis avail_jis_p defined_jis defined_jis_p
   is_hwjis_ucs avail_jis_h avail_jis_hp
-  EJV_JIS EJV_MS EJV_JIS2000 EJV_JIS2004 EJV_PTEX EJV_UPTEX
+  EJV_JIS EJV_MS EJV_JIS2000 EJV_JIS2004 EJV_PTEX EJV_UPTEX EJV_PTEXA
   MAX_UCS MAX_INTCODE MAX_INTCODE_EXT
 );
 our %EXPORT_TAGS = (
@@ -116,7 +116,7 @@ sub rev_arraymap_ {
 
 use constant {
   EJV_JIS => 0, EJV_MS => 1, EJV_JIS2000 => 2, EJV_JIS2004 => 3,
-  EJV_PTEX => 4, EJV_UPTEX => 5
+  EJV_PTEX => 4, EJV_UPTEX => 5, EJV_PTEXA => 6
 };
 my @e_enc_name_ = ( 'shiftjis', 'cp932', 'eucjp');
 our (@int_to_uni_, @uni_to_int_);
@@ -164,7 +164,7 @@ sub unicode_to_internal_ {
     if ($jver >= EJV_PTEX) {
       $ic = uni_to_int_ex_($uc, $jver);
       if (!defined $ic) {
-        $e = $e_enc_name_[$jver]; $t = chr($uc);
+        $e = $e_enc_name_[0]; $t = chr($uc);
         $t = unpack('n', (Encode::encode($e, $t, Encode::FB_CROAK)));
         $ic = to_internal_($t, ECS_SJIS);
       }
@@ -230,9 +230,21 @@ my %ptex_uni_to_int_ = (
 0xFFE1,   81,
 0xFFE2,  137,
 );
+my %ptexA_uni_to_int_ = (
+0x00A5,   78,
+0x2014,   28,
+0x203E,   16,
+0x2225,   33,
+0x22EF,   35,
+0xFF0D,   60,
+0xFF5E,   32,
+0xFFE0,   80,
+0xFFE1,   81,
+0xFFE2,  137,
+);
 sub int_to_uni_ex_ {
   my ($ic, $jver) = @_;
-  if ($jver == EJV_PTEX) {
+  if ($jver == EJV_PTEX || $jver == EJV_PTEXA) {
     return $ptex_int_to_uni_{$ic};
   } elsif ($jver == EJV_UPTEX) {
     return $uptex_int_to_uni_{$ic};
@@ -245,8 +257,10 @@ sub uni_to_int_ex_ {
   my ($uc, $jver) = @_;
   if ($jver == EJV_PTEX || $jver == EJV_UPTEX) {
     return $ptex_uni_to_int_{$uc};
+  } elsif ($jver == EJV_PTEXA) {
+    return $ptexA_uni_to_int_{$uc};
   }
-  return 
+  return;
 }
 
 
